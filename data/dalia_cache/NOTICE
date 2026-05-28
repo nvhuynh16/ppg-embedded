@@ -1,0 +1,33 @@
+PPG-DaLiA dataset
+=================
+
+Citation:
+  Reiss, A., Indlekofer, I., Schmidt, P. and Van Laerhoven, K. (2019).
+  "Deep PPG: large-scale heart rate estimation with convolutional neural
+  networks." Sensors, 19(14), 3079.
+  DOI: 10.3390/s19143079
+
+Source:
+  UCI Machine Learning Repository — https://archive.ics.uci.edu/dataset/495/ppg+dalia
+
+License:
+  Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0).
+  Academic / non-commercial use only.
+  https://creativecommons.org/licenses/by-nc/4.0/
+
+What's committed here:
+  extracts/S1.npz, extracts/S6.npz — wrist BVP @ 64 Hz, ECG-derived HR labels
+  @ 0.5 Hz, and activity codes @ 4 Hz for two representative subjects. Stripped
+  from the full ~1.5 GB per-subject pickles (which include chest ECG @ 700 Hz,
+  EMG, EDA, accelerometer, etc. — all unused by this project).
+
+What's NOT committed:
+  The full PPG-DaLiA pickles (S1..S15, ~21 GB total) and the source archive
+  PPG_FieldStudy.zip (~1.2 GB). These are fetched on demand by
+  scripts/fetch_dalia.py and stripped to per-subject extracts by
+  scripts/make_dalia_extracts.py — both kept local-only via .gitignore.
+
+Why two subjects:
+  Mirrors the BIDMC cache pattern (bidmc01-03 committed; 04-53 on-demand).
+  Two subjects are enough for CI smoke tests and the public README's demos.
+  The full SQI-training workflow (Phase 3) requires all 15 subjects locally.

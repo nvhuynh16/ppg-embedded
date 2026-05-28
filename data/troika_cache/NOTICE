@@ -1,0 +1,30 @@
+TROIKA dataset — placeholder
+============================
+
+Reference:
+  Zhang, Z., Pi, Z., and Liu, B. (2014). "TROIKA: A general framework for
+  heart rate monitoring using wrist-type photoplethysmographic signals during
+  intensive physical exercise." IEEE Trans. Biomed. Eng., 62(2), 522-531.
+
+Status:
+  This directory is reserved for TROIKA .mat files (DATA_01_TYPE01.mat ..
+  DATA_12_TYPE02.mat). The dataset itself is NOT committed — the original
+  Zhang 2014 hosting at SJTU is gone, and the dataset's "non-commercial
+  research use" terms make redistributing it ourselves inadvisable.
+
+How to stage TROIKA locally:
+  1. Source the 12 .mat files from a stable mirror or the corresponding author.
+  2. Drop them into this directory (data/troika_cache/).
+  3. src/load_troika.py will pick them up. Run with:
+       uv run python -c "import sys; sys.path.insert(0,'src'); \
+         from load_troika import list_cache, load_troika_record; \
+         print(list_cache()); print(load_troika_record('DATA_01_TYPE01'))"
+
+License (if you stage the files):
+  Non-commercial research use only, per the dataset's published terms.
+
+Why PPG-DaLiA is sufficient on its own:
+  PPG-DaLiA's `walking`, `stairs`, `table-soccer`, and `cycling` activities
+  cover the motion-corrupted regime that the classical DSP pipeline fails on.
+  Activity-coded windows give a clean clean-vs-motion split for SQI training.
+  TROIKA would add held-out test diversity, not new training-set coverage.
