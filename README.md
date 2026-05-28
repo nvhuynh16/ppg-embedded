@@ -70,10 +70,7 @@ no-leakage statement are in [`results/README.md`](results/README.md).
 The repo spans Python golden model + Cortex-M3 firmware + validators + animations.
 If you're skimming, follow the depth you have:
 
-- **5 minutes** — The headline tables above, plus the pipeline animation
-  embedded at the top.
-
-- **15 minutes** — The four files that contain the actual algorithms:
+- **Short read** — The four files that contain the actual algorithms:
   [`firmware/main_fft.c`](firmware/main_fft.c) (100 lines — the FFT pipeline with
   the sub-harmonic check), [`firmware/dsp_fft.c`](firmware/dsp_fft.c)
   (the Q15 radix-2 FFT with per-stage `>>1` scaling),
@@ -267,26 +264,3 @@ uv run python src/make_peak_anim.py    # also: make_fft_anim.py, make_rr_anim.py
 # Embed snippets (HTML <video>, Markdown <img>) in results/web/README.md
 ```
 
-## Future work
-
-- **Cortex-M4F port under Renode** — enables honest cycle counts (QEMU's
-  `lm3s6965evb` is functional, not cycle-accurate).
-- **CMSIS-DSP integration** — `arm_fir_q15` / `arm_rfft_q15` with SIMD intrinsics
-  on M4F; a measurable speedup over the hand-rolled Q15 primitives here.
-- **TFLite-Micro signal-quality classifier** — replace the variance-based SQI
-  gate with a learned model. The validator infrastructure is already
-  per-record-organised; the no-leakage statement in `results/README.md`
-  becomes load-bearing the moment a learned component is introduced.
-- **Pan-Tompkins adaptive-threshold peak detector** — clinical-grade
-  replacement for the current half-max-threshold rule.
-- **Karlen-2013 three-channel RR + smart fusion** — add AM (amplitude-modulation)
-  and FM (RSA) channels to the existing BW path; quality-weighted smart
-  fusion. The Python draft is at `src/_respiration_three_channel_draft.py`.
-- **More datasets** — PPG-DaLiA (wearable motion), CapnoBase (clinician-validated
-  RR reference), MIMIC-III Waveform (ICU at scale), TROIKA (exercise motion).
-- **Real-hardware demo** — Arduino Nano 33 BLE Sense (MAX30102 PPG) or STM32F4
-  Discovery + breakout PPG. Switches the framing from "validated in emulation"
-  to "validated on hardware."
-- **Smarter sub-harmonic swap rule** — incorporate spectral peak sharpness, not
-  just magnitude ratio, so a tighter α can be used without the false-positive
-  cost.
