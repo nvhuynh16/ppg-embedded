@@ -119,12 +119,30 @@ jobs:
       - name: Q15 dynamic-range proof
         run: uv run python src/qformat_proof.py
 
-      # 4. FFT firmware build + QEMU run.
-      - name: Build FFT firmware + QEMU smoke test
+      # 4. FFT firmware build + QEMU run. Split into sub-steps so a failure
+      # pinpoints whether it was the build, QEMU, or the grep.
+      - name: Toolchain version banner (diagnostic)
         run: |
+          arm-none-eabi-gcc --version
+          qemu-system-arm --version
+          dpkg -l | grep -E 'arm-none-eabi|qemu-system' || true
+
+      - name: Build FFT firmware
+        run: |
+          set -x
           make -C firmware firmware_fft.elf
-          bash firmware/run_qemu.sh firmware_fft.elf | tee /tmp/fft_qemu.log
-          grep -q "HR_X100=" /tmp/fft_qemu.log
+          ls -la firmware/firmware_fft.elf
+          arm-none-eabi-size firmware/firmware_fft.elf
+
+      - name: Run FFT firmware on QEMU (semihosting)
+        run: |
+          set -x
+          bash firmware/run_qemu.sh firmware_fft.elf 2>&1 | tee /tmp/fft_qemu.log
+          echo "--- qemu finished; log size: $(wc -c </tmp/fft_qemu.log) bytes ---"
+          cat /tmp/fft_qemu.log
+
+      - name: Assert HR_X100 in QEMU output
+        run: grep -q "HR_X100=" /tmp/fft_qemu.log
 
       # 5. BIDMC batch validation on the 3 cached records (smoke), ±5 windows.
       - name: BIDMC batch validation (3 records × 5 windows smoke test)
