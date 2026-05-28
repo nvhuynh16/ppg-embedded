@@ -1,10 +1,10 @@
 # Embedded PPG Heart-Rate + Respiration-Rate Estimator — ARM Cortex-M3 (QEMU)
 
 <p align="center">
-  <img src="results/web/pipeline.gif" alt="PPG pipeline animation: raw signal → Q15 band-pass FIR → peak detection → live HR readout" width="720">
+  <img src="results/web/pipeline_fft.gif" alt="PPG FFT pipeline animation: raw signal → Q15 band-pass FIR → 256-pt FFT spectrum → live HR readout" width="720">
   <br>
-  <em>BIDMC record 01 → Q15 band-pass FIR → peak detection → live HR.
-  The number ticking below is the firmware's median-inter-peak-interval estimator, bit-exactly.</em>
+  <em>BIDMC record 01 → Q15 band-pass FIR → decimate → Hamming → 256-pt Q15 FFT → sub-harmonic check → live HR.
+  The number ticking below is the firmware's parabolic-interpolated spectral estimator, bit-exactly.</em>
 </p>
 
 [![CI](https://img.shields.io/badge/CI-build--and--validate-blue)](.github/workflows/ci.yml)
