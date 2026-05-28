@@ -1,0 +1,42 @@
+{
+  "config": {
+    "threshold": 0.45,
+    "win_s": 8.0,
+    "hop_s": 2.0,
+    "fs_bvp": 64.0,
+    "subjects": [
+      "S6",
+      "S15"
+    ]
+  },
+  "per_subject": [
+    {
+      "subject": "S6",
+      "n_windows": 2622,
+      "variance": {
+        "mae_bpm": 13.703402477975619,
+        "acceptance_pct": 90.00762776506484,
+        "n_accepted": 2360
+      },
+      "cnn": {
+        "mae_bpm": 5.7601104392376685,
+        "acceptance_pct": 71.73913043478261,
+        "n_accepted": 1881
+      }
+    },
+    {
+      "subject": "S15",
+      "n_windows": 3966,
+      "variance": {
+        "mae_bpm": 10.937349212817452,
+        "acceptance_pct": 90.01512859304084,
+        "n_accepted": 3570
+      },
+      "cnn": {
+        "mae_bpm": 4.91003183197966,
+        "acceptance_pct": 65.98587997982854,
+        "n_accepted": 2617
+      }
+    }
+  ]
+}

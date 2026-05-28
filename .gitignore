@@ -54,3 +54,10 @@ data/dalia_cache/extracts/*.npz
 # TROIKA cache: dataset isn't redistributable from this repo (see NOTICE).
 # Block .mat files; commit only the NOTICE + (future) fetch script.
 data/troika_cache/*.mat
+# Private workspace: training scripts + experiment notebooks + scratch.
+# Never pushed. Contains PyTorch training code that lives outside the
+# public artifact (the inference path uses numpy only).
+private/
+# Model weights — kept local. The public repo demonstrates the inference
+# code + numbers; the actual weights are not redistributed.
+models/
