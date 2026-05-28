@@ -20,6 +20,8 @@ firmware/generated/golden.json
 application*/
 # author-facing learning walkthrough — kept locally for prep, never tracked
 TUTORIAL.md
+# AI-assistant guidance for editing this repo — kept locally, never tracked
+CLAUDE.md
 # BIDMC sweep cache: only bidmc01-03 are committed (sufficient for CI); other records
 # are downloaded on-demand for full-sweep validation runs and kept local.
 data/bidmc_cache/*.dat

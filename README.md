@@ -176,10 +176,10 @@ ppg-embedded/
 ├── data/bidmc_cache/           # 3 BIDMC records cached for CI (full sweep fetches locally)
 ├── results/                    # bidmc.csv, metrics.json, plots, coverage, footprint, …
 │   └── web/                    # career-site assets: pipeline.{gif,mp4} for all 3 paths
-├── docs/                       # Pages dashboard (index.html) + Q-format proof
+├── docs/                       # Q-format dynamic-range proof
 ├── ci/                         # baseline metrics for the perf-regression gate
 ├── scripts/check_regression.py # CI gate: current sweep vs baseline metrics
-├── .github/workflows/          # ci.yml (build + test + static analysis) + pages.yml
+├── .github/workflows/          # ci.yml (build + test + static analysis + coverage + sweep smoke)
 └── pyproject.toml              # uv project
 ```
 
