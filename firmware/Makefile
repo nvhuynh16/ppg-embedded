@@ -19,6 +19,7 @@ LDFLAGS = -T lm3s6965.ld -nostartfiles --specs=nosys.specs -Wl,--gc-sections
 SRCS     = startup.c main.c dsp_fixed.c
 FFT_SRCS = startup.c main_fft.c dsp_fixed.c dsp_fft.c
 RR_SRCS  = startup.c main_rr.c dsp_fixed.c dsp_resp.c
+SQI_SRCS = startup.c main_sqi.c dsp_cnn.c
 
 firmware.elf: $(SRCS) generated/ppg_data.h lm3s6965.ld
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(SRCS)
@@ -28,6 +29,9 @@ firmware_fft.elf: $(FFT_SRCS) generated/ppg_data.h generated/fft_data.h dsp_fft.
 
 firmware_rr.elf: $(RR_SRCS) generated/ppg_data.h generated/resp_data.h dsp_resp.h lm3s6965.ld
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(RR_SRCS)
+
+firmware_sqi.elf: $(SQI_SRCS) generated/cnn_data.h dsp_cnn.h lm3s6965.ld
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(SQI_SRCS)
 
 run: firmware.elf
 	bash run_qemu.sh
