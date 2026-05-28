@@ -1,0 +1,16 @@
+# Cppcheck suppressions for ppg-embedded.
+#
+# Format: <error-id>[:<file>[:<line>]]
+# One per line. Comments start with '#'.
+#
+# Policy: keep this file short. If a real issue surfaces, fix the code rather
+# than add a suppression. Items here are either (a) tooling false positives or
+# (b) intentionally-excluded generated artifacts.
+
+# Cppcheck sometimes can't find system headers in minimal CI environments
+# (cross-tool ARM headers shipped under /usr/lib/gcc/arm-none-eabi/...).
+missingIncludeSystem
+
+# Auto-generated data arrays from src/reference.py — out of scope for cppcheck.
+# Pattern matches firmware/generated/ppg_data.h, fft_data.h, resp_data.h.
+*:firmware/generated/*.h

@@ -1,0 +1,20 @@
+[project]
+name = "ppg-embedded"
+version = "0.1.0"
+description = "Embedded fixed-point PPG heart-rate estimator for ARM Cortex-M3, validated in QEMU."
+requires-python = ">=3.12"
+# Only needed for real PhysioNet data (--record) and plotting.
+# The default synthetic reference (src/reference.py) runs on the stdlib alone.
+dependencies = [
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "wfdb",
+    # Web/portfolio asset generation (src/make_{peak,fft,rr}_anim.py).
+    # imageio-ffmpeg bundles a small ffmpeg binary so MP4 export works
+    # without a system install.
+    "imageio-ffmpeg",
+]
+
+[tool.uv]
+package = false

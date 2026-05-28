@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ppg-embedded — HR + RR Estimator on Cortex-M3 (QEMU)</title>
+<style>
+  :root {
+    --fg:#1a1d22; --bg:#fdfdfd; --accent:#2563eb; --muted:#6b7280;
+    --card:#f6f7fa; --border:#e5e7eb; --good:#15803d; --warn:#b45309;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --fg:#e5e7eb; --bg:#0f1115; --accent:#60a5fa;
+             --card:#1a1d22; --border:#2a2e35; --muted:#9ca3af; }
+  }
+  html { box-sizing: border-box; }
+  *, *::before, *::after { box-sizing: inherit; }
+  body { margin: 0 auto; max-width: 920px; padding: 2rem 1.25rem;
+         font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+         color: var(--fg); background: var(--bg); }
+  h1 { font-size: 1.7rem; margin: 0 0 .25rem; letter-spacing: -0.01em; }
+  h2 { font-size: 1.2rem; margin: 2rem 0 .5rem; }
+  h3 { font-size: 1rem; margin: 1.25rem 0 .5rem; color: var(--muted); }
+  p.tagline { color: var(--muted); margin: 0 0 1.5rem; }
+  code, kbd { font-family: var(--mono); font-size: 0.9em; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .meta { color: var(--muted); font-size: 0.9rem; }
+
+  .card { background: var(--card); border: 1px solid var(--border);
+          border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; }
+
+  table { border-collapse: collapse; width: 100%; margin: .5rem 0; font-size: 0.95rem; }
+  th, td { padding: 0.45rem 0.6rem; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 500; }
+  td.num, th.num { text-align: right; font-family: var(--mono); }
+  .winner { font-weight: 600; color: var(--good); }
+
+  video, img.plot { max-width: 100%; height: auto; border-radius: 6px;
+                    border: 1px solid var(--border); display: block; }
+  figure { margin: 1rem 0; }
+  figcaption { color: var(--muted); font-size: 0.85rem; padding-top: 0.3rem; }
+
+  .grid { display: grid; gap: 1rem; }
+  @media (min-width: 700px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+
+  .badges { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 0.5rem 0 1rem; }
+  .badge { font-family: var(--mono); font-size: 0.78rem; padding: 2px 8px;
+           border-radius: 4px; background: var(--card); border: 1px solid var(--border); }
+  .badge.ok { color: var(--good); border-color: var(--good); }
+</style>
+</head>
+<body>
+
+<h1>ppg-embedded</h1>
+<p class="tagline">
+  Fixed-point (Q15) PPG → Heart-rate + Respiration-rate estimator on ARM Cortex-M3,
+  validated in QEMU against PhysioNet BIDMC (53 records). No hardware required.
+</p>
+
+<div class="badges">
+  <span class="badge ok">100 % line coverage on DSP core</span>
+  <span class="badge ok">19/19 Unity tests pass</span>
+  <span class="badge ok">FFT bit-exact vs numpy ≤ 9 LSB</span>
+  <span class="badge ok">Q15 dynamic-range proof passes</span>
+  <span class="badge">MIT licence</span>
+</div>
+
+<p>
+  <a href="https://github.com/nvhuynh16/ppg-embedded">→ Source on GitHub</a> ·
+  <a href="https://github.com/nvhuynh16/ppg-embedded/blob/main/docs/qformat_proof.md">Q15 dynamic-range proof</a> ·
+  <a href="https://github.com/nvhuynh16/ppg-embedded/blob/main/results/README.md">Methodology + limitations</a>
+</p>
+
+<h2>Pipeline animation</h2>
+<figure>
+  <video src="https://github.com/nvhuynh16/ppg-embedded/raw/main/results/web/pipeline.mp4"
+         autoplay muted loop playsinline controls preload="metadata"></video>
+  <figcaption>
+    BIDMC record 01 → Q15 band-pass FIR → peak detection → live HR.
+    The number ticking below is the actual firmware's median-inter-peak-interval
+    estimator, bit-exactly.
+  </figcaption>
+</figure>
+
+<h2>Headline numbers (BIDMC, 53 records, 30 s windows, bootstrap 95 % CIs)</h2>
+
+<h3>Heart rate</h3>
+<div id="hr-table"><em class="meta">loading metrics…</em></div>
+
+<h3>Respiration rate (BW path)</h3>
+<div id="rr-table"><em class="meta">loading metrics…</em></div>
+
+<h2>Plots</h2>
+<div class="grid grid-2">
+  <figure>
+    <img class="plot" alt="Bland-Altman, HR"
+         src="https://github.com/nvhuynh16/ppg-embedded/raw/main/results/bland_altman.png">
+    <figcaption>HR Bland-Altman (peak detector, full 53 records).</figcaption>
+  </figure>
+  <figure>
+    <img class="plot" alt="HR scatter"
+         src="https://github.com/nvhuynh16/ppg-embedded/raw/main/results/hr_scatter.png">
+    <figcaption>Embedded HR vs ECG-derived reference.</figcaption>
+  </figure>
+  <figure>
+    <img class="plot" alt="Method comparison"
+         src="https://github.com/nvhuynh16/ppg-embedded/raw/main/results/method_comparison.png">
+    <figcaption>Peak vs FFT+harm head-to-head, full 53-record sweep.</figcaption>
+  </figure>
+  <figure>
+    <img class="plot" alt="Window-length sweep"
+         src="https://github.com/nvhuynh16/ppg-embedded/raw/main/results/window_sweep.png">
+    <figcaption>MAE / accuracy / failure-rate vs window length.
+      Defends the 30 s default.</figcaption>
+  </figure>
+  <figure>
+    <img class="plot" alt="RR Bland-Altman"
+         src="https://github.com/nvhuynh16/ppg-embedded/raw/main/results/respiration_ba.png">
+    <figcaption>RR Bland-Altman (BW path, full 53 records).</figcaption>
+  </figure>
+  <figure>
+    <img class="plot" alt="RR scatter"
+         src="https://github.com/nvhuynh16/ppg-embedded/raw/main/results/respiration_scatter.png">
+    <figcaption>Embedded RR vs BIDMC impedance-pneumography reference.</figcaption>
+  </figure>
+</div>
+
+<h2>What's in this repo</h2>
+<ul>
+  <li><strong>Three Cortex-M3 firmware entry points</strong> — peak detector
+    (<code>main.c</code>), FFT spectral path with sub-harmonic check (<code>main_fft.c</code>),
+    BW-path respiration estimator (<code>main_rr.c</code>) — all sharing one Q15 DSP layer.</li>
+  <li><strong>FFT sub-harmonic check</strong> — catches PPG morphologies where the
+    2nd harmonic carries more energy than the fundamental (otherwise the FFT path
+    locks at 2× HR). Without the check, MAE 2.43 bpm; with it, 1.72 bpm.</li>
+  <li><strong>Q15 dynamic-range proof</strong> — closed-form bounds for every
+    Q-format variable + Monte-Carlo validator.
+    <a href="https://github.com/nvhuynh16/ppg-embedded/blob/main/docs/qformat_proof.md">docs/qformat_proof.md</a></li>
+  <li><strong>Unity unit tests + gcov</strong> — 19 tests, 100 % line coverage on
+    <code>dsp_fixed.c</code> + <code>dsp_fft.c</code>.</li>
+  <li><strong>Patient-cluster bootstrap CIs</strong> — every published metric is a
+    range, not a point. See
+    <a href="https://github.com/nvhuynh16/ppg-embedded/blob/main/src/bootstrap.py">src/bootstrap.py</a>
+    for why cluster vs window resampling.</li>
+  <li><strong>Bit-exactness contract</strong> — the Q15 FFT in
+    <code>firmware/dsp_fft.c</code> matches <code>numpy.fft.fft</code> within
+    log₂(N)+1 LSB per bin. The Python golden reference and the C firmware
+    share the same algorithmic invariants.</li>
+</ul>
+
+<p class="meta">
+  This dashboard is generated by GitHub Actions on every push to <code>main</code>.
+  Metric values are read live from the repo's <code>results/*.json</code>.
+</p>
+
+<script>
+const FMT = (x, d=2) => (typeof x === "number" ? x.toFixed(d) : "—");
+const FMT_CI = (point, ci, d=2) => {
+  if (typeof point !== "number") return "—";
+  if (!Array.isArray(ci)) return FMT(point, d);
+  return `${FMT(point, d)} [${FMT(ci[0], d)}, ${FMT(ci[1], d)}]`;
+};
+function rawUrl(p) {
+  return `https://raw.githubusercontent.com/nvhuynh16/ppg-embedded/main/${p}`;
+}
+function mkRow(label, peak, fft, isWinner) {
+  const cls = isWinner === "fft"  ? "winner" : "";
+  const cls2 = isWinner === "peak" ? "winner" : "";
+  return `<tr><td>${label}</td><td class="num ${cls2}">${peak}</td><td class="num ${cls}">${fft}</td></tr>`;
+}
+async function loadJson(p) {
+  try {
+    const r = await fetch(rawUrl(p));
+    if (!r.ok) throw new Error(r.statusText);
+    return await r.json();
+  } catch (e) {
+    return null;
+  }
+}
+async function renderHR() {
+  const data = await loadJson("results/method_comparison.json");
+  const el = document.getElementById("hr-table");
+  if (!data) { el.innerHTML = '<p class="meta">(metrics not available — check repo)</p>'; return; }
+  const p = data.peak, f = data.fft;
+  const rows = [
+    mkRow("n (estimable)", p.n, f.n, "fft"),
+    mkRow("MAE (bpm)",
+      FMT_CI(p.mae_bpm, p.mae_bpm_ci95),
+      FMT_CI(f.mae_bpm, f.mae_bpm_ci95), "fft"),
+    mkRow("% within ±5 bpm",
+      FMT_CI(p.pct_within_5bpm, p.pct_within_5bpm_ci95, 1),
+      FMT_CI(f.pct_within_5bpm, f.pct_within_5bpm_ci95, 1), "fft"),
+    mkRow("% within ±3 bpm",
+      FMT_CI(p.pct_within_3bpm, p.pct_within_3bpm_ci95, 1),
+      FMT_CI(f.pct_within_3bpm, f.pct_within_3bpm_ci95, 1), "fft"),
+    mkRow("Pearson r",
+      FMT_CI(p.pearson_r, p.pearson_r_ci95, 3),
+      FMT_CI(f.pearson_r, f.pearson_r_ci95, 3), "peak"),
+    mkRow("Algorithm-failure %",
+      FMT(p.failure_rate_pct, 1), FMT(f.failure_rate_pct, 1), "fft"),
+  ].join("");
+  el.innerHTML =
+    `<table><thead><tr><th>Metric</th><th class="num">Peak detector</th>
+     <th class="num">FFT + sub-harmonic</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+async function renderRR() {
+  const data = await loadJson("results/respiration.json");
+  const el = document.getElementById("rr-table");
+  if (!data || !data.estimable) { el.innerHTML = '<p class="meta">(RR metrics not available)</p>'; return; }
+  const e = data.estimable;
+  el.innerHTML =
+    `<table><thead><tr><th>Metric</th><th class="num">Value [95 % CI]</th></tr></thead><tbody>
+     <tr><td>n (estimable)</td><td class="num">${e.n}</td></tr>
+     <tr><td>MAE (BrPM)</td><td class="num">${FMT_CI(e.mae_brpm, e.mae_brpm_ci95)}</td></tr>
+     <tr><td>% within ±2 BrPM</td><td class="num">${FMT_CI(e.pct_within_2brpm, e.pct_within_2brpm_ci95, 1)}</td></tr>
+     <tr><td>% within ±4 BrPM</td><td class="num">${FMT_CI(e.pct_within_4brpm, e.pct_within_4brpm_ci95, 1)}</td></tr>
+     <tr><td>Pearson r</td><td class="num">${FMT_CI(e.pearson_r, e.pearson_r_ci95, 3)}</td></tr>
+     </tbody></table>`;
+}
+renderHR();
+renderRR();
+</script>
+
+</body>
+</html>

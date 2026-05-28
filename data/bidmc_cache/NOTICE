@@ -1,0 +1,43 @@
+BIDMC PPG and Respiration Dataset — local cache
+================================================
+
+This directory contains a small subset of the BIDMC PPG and Respiration Dataset
+(records bidmc01, bidmc02, bidmc03), cached locally for CI and offline reproduction.
+
+Citation (required)
+-------------------
+Pimentel, M. A. F., Johnson, A. E. W., Charlton, P. H., Birrenkott, D., Watkinson,
+P. J., Tarassenko, L., & Clifton, D. A. (2017). Toward a robust estimation of
+respiratory rate from pulse oximeters. IEEE Transactions on Biomedical Engineering,
+64(8), 1914–1923. https://doi.org/10.1109/TBME.2016.2613124
+
+Goldberger, A. L., Amaral, L. A. N., Glass, L., Hausdorff, J. M., Ivanov, P. Ch.,
+Mark, R. G., Mietus, J. E., Moody, G. B., Peng, C.-K., & Stanley, H. E. (2000).
+PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource
+for complex physiologic signals. Circulation, 101(23), e215–e220.
+
+Source
+------
+https://physionet.org/content/bidmc/1.0.0/
+
+License
+-------
+Open Data Commons Open Database License (ODbL-1.0).
+Full text: https://opendatacommons.org/licenses/odbl/1.0/
+
+The ODbL permits redistribution with attribution and share-alike on derived
+databases. This NOTICE preserves the required attribution; downstream derived
+databases (e.g. the per-window metrics CSV under results/) must remain under
+ODbL-compatible terms.
+
+What's included
+---------------
+bidmc{01,02,03}.dat       — waveform binary (PLETH, RESP, ECG channels, 125 Hz)
+bidmc{01,02,03}.hea       — WFDB header
+bidmc_csv/bidmc_{01,02,03}_Numerics.csv — 1 Hz HR/RR/SpO2 reference values
+
+What's not included
+-------------------
+The remaining 50 BIDMC records, the .breath annotation files, and bidmcNNn.* (numerics
+in WFDB binary). Fetch the full dataset locally via:
+  uv run python -c "import wfdb; wfdb.dl_database('bidmc', 'data/bidmc_cache')"

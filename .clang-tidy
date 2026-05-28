@@ -1,0 +1,33 @@
+# clang-tidy config for ppg-embedded firmware (C, freestanding, Cortex-M3).
+#
+# Policy: catch real bugs, ignore stylistic noise that doesn't apply to fixed-
+# point embedded DSP code. Enabled families plus deliberate opt-outs below.
+#
+# Runs in informational mode (WarningsAsErrors='') so findings surface in CI
+# logs without blocking. Flip to strict (`WarningsAsErrors=*`) once the
+# initial findings are addressed.
+
+Checks: >
+  bugprone-*,
+  cert-*,
+  clang-analyzer-*,
+  misc-*,
+  performance-*,
+  portability-*,
+  readability-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-narrowing-conversions,
+  -cert-err33-c,
+  -misc-no-recursion,
+  -readability-function-cognitive-complexity,
+  -readability-identifier-length,
+  -readability-isolate-declaration,
+  -readability-magic-numbers,
+  -readability-uppercase-literal-suffix
+
+WarningsAsErrors: ''
+
+# Only the project's own headers under firmware/; skip system + generated.
+HeaderFilterRegex: '^firmware/(?!generated/)[^/]+\.h$'
+
+FormatStyle: file

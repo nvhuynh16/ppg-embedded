@@ -1,0 +1,144 @@
+name: build-and-validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  static-analysis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install static analyzers
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends cppcheck clang-tidy
+
+      # Both run in informational mode (exit 0 on findings) so the punch list
+      # surfaces in CI logs without blocking. Flip to strict
+      # (`--error-exitcode=1`, `WarningsAsErrors=*`) once findings are
+      # addressed.
+      - name: cppcheck (informational)
+        run: |
+          cppcheck \
+            --enable=warning,style,performance,portability \
+            --inline-suppr \
+            --suppressions-list=.cppcheck-suppressions \
+            --error-exitcode=0 \
+            -I firmware \
+            firmware/dsp_fixed.c firmware/dsp_fft.c firmware/main.c \
+            firmware/main_fft.c firmware/startup.c \
+            firmware/host_test.c firmware/host_fft_test.c \
+            2>&1 | tee /tmp/cppcheck.log
+          echo
+          echo "=== cppcheck summary ==="
+          grep -cE '^\[|error|warning|style|performance|portability' /tmp/cppcheck.log || echo 0
+          echo "(non-zero count above ⇒ punch list to address)"
+
+      - name: clang-tidy (informational)
+        run: |
+          # Run against firmware C sources; not Cortex-M cross-compile flags
+          # (clang-tidy uses host headers — fine for our checks).
+          clang-tidy \
+            firmware/dsp_fixed.c firmware/dsp_fft.c \
+            firmware/main.c firmware/main_fft.c \
+            firmware/host_test.c firmware/host_fft_test.c \
+            -- -I firmware -ffreestanding -std=c11 \
+            2>&1 | tee /tmp/clang-tidy.log || true
+          echo
+          echo "=== clang-tidy summary ==="
+          grep -cE 'warning:|error:' /tmp/clang-tidy.log || echo 0
+          echo "(non-zero count above ⇒ punch list to address)"
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ARM toolchain + QEMU
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            gcc-arm-none-eabi qemu-system-arm
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: latest
+
+      - run: uv sync
+
+      # 1. Bare-stdlib reference + QEMU validation against synthetic signal.
+      - name: Reference → firmware → QEMU (peak-detector path)
+        run: ./run_all.sh
+
+      # 2. Fast host-side DSP canary (no QEMU): peak detector.
+      - name: Host-test peak detector
+        run: |
+          make -C firmware host-test
+
+      # 2b. Unity unit tests for dsp_fixed + dsp_fft (host-compile, sub-second).
+      - name: Unity unit tests
+        run: |
+          make -C firmware test
+
+      # 2c. Line coverage on the DSP core (gcov). Target ≥95 % on dsp_fixed.c
+      # and dsp_fft.c; currently at 100 %.
+      - name: Coverage (gcov)
+        run: |
+          make -C firmware coverage
+          cat results/coverage.md
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: results/coverage.md
+
+      # 3. FFT bit-exactness vs numpy.fft (host gcc + numpy).
+      - name: FFT bit-exactness vs numpy
+        run: uv run python src/verify_fft.py
+
+      # 3b. Q15 dynamic-range proof — fails if any fixed-point variable's
+      # Monte-Carlo worst case exceeds its analytical bound.
+      - name: Q15 dynamic-range proof
+        run: uv run python src/qformat_proof.py
+
+      # 4. FFT firmware build + QEMU run.
+      - name: Build FFT firmware + QEMU smoke test
+        run: |
+          make -C firmware firmware_fft.elf
+          bash firmware/run_qemu.sh firmware_fft.elf | tee /tmp/fft_qemu.log
+          grep -q "HR_X100=" /tmp/fft_qemu.log
+
+      # 5. BIDMC batch validation on the 3 cached records (smoke), ±5 windows.
+      - name: BIDMC batch validation (3 records × 5 windows smoke test)
+        run: |
+          uv run python src/batch_validate.py \
+            --records bidmc01,bidmc02,bidmc03 \
+            --window 30 \
+            --limit-windows 5 \
+            --cache-dir data/bidmc_cache
+
+      # 6. Footprint report (no fail; just emits results/footprint.md).
+      - name: Footprint
+        run: uv run python src/footprint.py
+
+      # 7. Performance-regression gate against ci/baseline_*.json. The 3-record
+      # smoke is too small for tight gates (bootstrap variance dominates), so
+      # we run --informational here; the full 53-record release-validation
+      # invocation runs without the flag.
+      - name: Perf-regression check (informational on 3-record smoke)
+        run: uv run python scripts/check_regression.py --informational

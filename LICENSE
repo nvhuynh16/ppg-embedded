@@ -1,0 +1,36 @@
+MIT License
+
+Copyright (c) 2026 Nen Van Huynh
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+Third-party content:
+
+- BIDMC PPG and Respiration Dataset (Pimentel et al. 2017, IEEE TBME) —
+  Open Data Commons Open Database License v1.0 (ODbL-1.0). The shipped
+  subset (bidmc01-03 .dat/.hea + corresponding Numerics CSVs) is
+  redistributed under that license; see `data/bidmc_cache/NOTICE`.
+
+- Unity v2.6.0 (firmware/unity.{c,h,_internals.h}) by ThrowTheSwitch —
+  MIT-licensed; original copyright preserved in the file headers.
+
+- (If added in future) PPG-DaLiA — CC BY 4.0; CapnoBase — ODbL-1.0.
+  See respective NOTICE files in each cache directory.

@@ -1,0 +1,36 @@
+# build artifacts
+firmware/*.elf
+firmware/*.o
+firmware/host_test
+firmware/host_fft_test
+firmware/test_dsp_fixed
+firmware/test_dsp_fft
+firmware/test_dsp_fixed_cov
+firmware/test_dsp_fft_cov
+firmware/*.gcno
+firmware/*.gcda
+firmware/*.gcov
+# python / uv
+.venv/
+__pycache__/
+*.pyc
+# generated golden metadata (header is kept so the repo builds out of the box)
+firmware/generated/golden.json
+# personal job-application materials — never publish (contains phone / company-specific letter)
+application*/
+# author-facing learning walkthrough — kept locally for prep, never tracked
+TUTORIAL.md
+# BIDMC sweep cache: only bidmc01-03 are committed (sufficient for CI); other records
+# are downloaded on-demand for full-sweep validation runs and kept local.
+data/bidmc_cache/*.dat
+data/bidmc_cache/*.hea
+data/bidmc_cache/bidmc_csv/*.csv
+!data/bidmc_cache/bidmc01.dat
+!data/bidmc_cache/bidmc01.hea
+!data/bidmc_cache/bidmc02.dat
+!data/bidmc_cache/bidmc02.hea
+!data/bidmc_cache/bidmc03.dat
+!data/bidmc_cache/bidmc03.hea
+!data/bidmc_cache/bidmc_csv/bidmc_01_Numerics.csv
+!data/bidmc_cache/bidmc_csv/bidmc_02_Numerics.csv
+!data/bidmc_cache/bidmc_csv/bidmc_03_Numerics.csv
