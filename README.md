@@ -1,11 +1,18 @@
 # Embedded PPG Heart-Rate + Respiration-Rate Estimator — ARM Cortex-M3 (QEMU)
 
 <p align="center">
-  <img src="results/sqi_comparison.png" alt="1D-CNN SQI vs variance gate on held-out PPG-DaLiA: HR MAE drops from 12.0 to 5.3 bpm at 68% acceptance" width="720">
+  <img src="results/web/pipeline_sqi.gif" alt="PPG-DaLiA S6 around the sit→stairs transition: top panel shows raw wrist BVP with mint segments where the CNN-SQI accepts and gray segments where it rejects; middle is the FFT bin plot with the peak bin in red; bottom is a big BPM readout that drops to '--' (smartwatch convention) when the CNN rejects the window." width="780">
   <br>
-  <em>1D-CNN signal-quality gate vs the variance gate on held-out PPG-DaLiA subjects (S6, S15).
-  HR-MAE on accepted windows drops from 12.0 bpm to 5.3 bpm (−6.8 bpm) at ≥66 % acceptance.
-  Tiny CNN (~1k parameters), trained offline; numpy inference + bit-exact Cortex-M3 port.</em>
+  <em>
+  <b>What you're seeing:</b> wrist PPG from PPG-DaLiA subject S6 around the sit→stairs transition at t ≈ 920 s.
+  <br>
+  <b>Top panel</b> — raw band-pass-filtered BVP, with each 2-second segment recoloured by the CNN-SQI decision on the 8-second window ending at that point.
+  <b>Mint = CNN accepts</b> (reliable), <b>gray = CNN rejects</b> (motion-corrupted, unreliable).
+  <br>
+  <b>Middle panel</b> — 256-pt FFT magnitude² spectrum over the HR band. The <b>red bar</b> is the current peak bin; the top x-axis maps bins to bpm so you can read HR directly off the plot. During motion the spectrum becomes broad/multimodal and the peak bin jumps around frame-to-frame.
+  <br>
+  <b>Bottom panel</b> — the live HR readout the firmware would publish. When the CNN accepts, you see the FFT-path bpm; <b>when it rejects, you see "--"</b> — the smart-watch convention for "signal quality insufficient, don't act on this." That's the actual product the gate delivers: a system that says "I don't know" instead of confidently reporting a wrong number during arm motion.
+  </em>
 </p>
 
 [![CI](https://img.shields.io/badge/CI-build--and--validate-blue)](.github/workflows/ci.yml)
@@ -13,15 +20,14 @@
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 Fixed-point (Q15) photoplethysmography (PPG) → band-pass FIR → **three alternative
-estimators** on a single Cortex-M3:
+estimators plus a learned signal-quality gate**, all on a single Cortex-M3:
 
 - **Peak detector** (time-domain, median-inter-peak-interval HR)
 - **256-pt FFT spectral path** with sub-harmonic check
 - **BW-path respiration rate** — lowpass FIR + decimate + 24-bin Goertzel scan
+- **1D-CNN SQI gate** (~1k parameters, trained on PPG-DaLiA, float-32 inference) — decides per-window whether the FFT/peak HR estimate is trustworthy; cuts held-out HR-MAE on motion-corrupted wrist PPG from 12.0 → 5.3 bpm (−6.8 bpm).
 
-All in C for **ARM Cortex-M3**, **validated in emulation (QEMU `lm3s6965evb`)** against
-the **PhysioNet BIDMC dataset (53 records)** and a Python golden reference. **No hardware
-required.**
+The three classical estimators are in Q15 fixed-point; the CNN inference is in float (libgcc soft-float on the M3) and bit-exact between Python and C. **Validated in emulation (QEMU `lm3s6965evb`)** against the **PhysioNet BIDMC dataset (53 records)** for HR/RR and **PPG-DaLiA** (15 subjects) for the SQI gate, with patient-cluster bootstrap CIs and per-subject train/val/test splits respectively. **No hardware required.**
 
 > **Honesty note:** results are produced **in emulation**, not on a physical board.
 > Footprint numbers (text/data/bss bytes from `arm-none-eabi-size`) are exact; cycle-count
@@ -84,6 +90,10 @@ validated on 2, held-out test on the remaining 2:
 | S6               |    2622 | 13.70 bpm     | 90.0 %          | **5.76**  | 71.7 %  | **−7.94** |
 | S15              |    3966 | 10.94 bpm     | 90.0 %          | **4.91**  | 66.0 %  | **−6.03** |
 | **POOLED**       |  **6588** | **12.04 bpm** | **90.0 %**  | **5.27**  | **68.3 %** | **−6.77** |
+
+<p align="center">
+  <img src="results/sqi_comparison.png" alt="Bar chart: per-subject HR-MAE and acceptance rate, variance gate vs CNN gate, on PPG-DaLiA held-out subjects S6 and S15." width="640">
+</p>
 
 The CNN is **ported to Cortex-M3** (float kernel, [`firmware/dsp_cnn.c`](firmware/dsp_cnn.c) +
 [`firmware/main_sqi.c`](firmware/main_sqi.c) + Makefile target `firmware_sqi.elf`).

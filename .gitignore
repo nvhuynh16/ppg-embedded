@@ -38,8 +38,9 @@ data/bidmc_cache/bidmc_csv/*.csv
 !data/bidmc_cache/bidmc_csv/bidmc_03_Numerics.csv
 # animation outputs — large binary artifacts, regenerable via src/make_*_anim.py.
 # Keep pipeline_fft.gif tracked so the README hero image renders on GitHub.
-results/web/
+results/web/*
 !results/web/pipeline_fft.gif
+!results/web/pipeline_sqi.gif
 # PPG-DaLiA cache: full pickles (1.5 GB each) and the source archive stay local.
 # Only S1 + S6 .npz extracts (BVP + HR + activity, ~1.5 MB each) are committed —
 # mirrors the BIDMC bidmc01-03 allowlist pattern.
