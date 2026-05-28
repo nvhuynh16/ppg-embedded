@@ -172,7 +172,7 @@ ppg-embedded/
 │       └── resp_data.h         # AUTO-GENERATED lowpass coeffs + Goertzel tables
 ├── data/bidmc_cache/           # 3 BIDMC records cached for CI (full sweep fetches locally)
 ├── results/                    # bidmc.csv, metrics.json, plots, coverage, footprint, …
-│   └── web/                    # career-site assets: pipeline.{gif,mp4} for all 3 paths
+│   └── web/                    # pipeline animations (untracked except pipeline_fft.gif)
 ├── docs/                       # Q-format dynamic-range proof
 ├── ci/                         # baseline metrics for the perf-regression gate
 ├── scripts/check_regression.py # CI gate: current sweep vs baseline metrics
@@ -261,6 +261,5 @@ uv run python src/qformat_proof.py
 
 ```bash
 uv run python src/make_peak_anim.py    # also: make_fft_anim.py, make_rr_anim.py
-# Embed snippets (HTML <video>, Markdown <img>) in results/web/README.md
 ```
 

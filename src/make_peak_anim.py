@@ -1,4 +1,4 @@
-"""Render the peak-detector pipeline animation for a career-site / README embed.
+"""Render the peak-detector pipeline animation for a README embed.
 
 One of three sister scripts (peak / FFT / RR) sharing src/_anim_helpers.py.
 

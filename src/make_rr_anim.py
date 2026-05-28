@@ -1,4 +1,4 @@
-"""Respiration-rate (BW-path) animation for the career-site / README embed.
+"""Respiration-rate (BW-path) animation for a README embed.
 
 Per-frame pipeline (mirrors firmware/main_rr.c on a 30-s sliding window):
   lowpass FIR (0.5 Hz) → decimate by 32 → 24-bin Goertzel scan over the

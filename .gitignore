@@ -36,3 +36,7 @@ data/bidmc_cache/bidmc_csv/*.csv
 !data/bidmc_cache/bidmc_csv/bidmc_01_Numerics.csv
 !data/bidmc_cache/bidmc_csv/bidmc_02_Numerics.csv
 !data/bidmc_cache/bidmc_csv/bidmc_03_Numerics.csv
+# animation outputs — large binary artifacts, regenerable via src/make_*_anim.py.
+# Keep pipeline_fft.gif tracked so the README hero image renders on GitHub.
+results/web/
+!results/web/pipeline_fft.gif

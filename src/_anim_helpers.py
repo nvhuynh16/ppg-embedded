@@ -1,4 +1,4 @@
-"""Shared helpers for the three career-site pipeline animations
+"""Shared helpers for the three pipeline animations
 (make_peak_anim.py, make_fft_anim.py, make_rr_anim.py).
 
 Keeps the colour palette, signal loader, matplotlib axis styling, and
@@ -82,9 +82,9 @@ def save_anim(ani: FuncAnimation, out_dir: Path, name: str, fps: int,
 
     Playback-rate trim: the same frames are written to both files, but the
     GIF plays at `fps * gif_speed` and the MP4 at `fps * mp4_speed`. Defaults
-    are 1/3 (GIF) and 1/4 (MP4) — career-site embeds need the viewer time to
-    actually read the live HR / RR numbers, and an autoplay-loop on a
-    portfolio page is much more legible at the slower rate. Pass
+    are 1/3 (GIF) and 1/4 (MP4) — the viewer needs time to actually read the
+    live HR / RR numbers, and an autoplay loop is much more legible at the
+    slower rate. Pass
     `gif_speed=1.0, mp4_speed=1.0` to disable the trim. File sizes are
     unchanged (same N frames; only the per-frame duration field shifts).
     """

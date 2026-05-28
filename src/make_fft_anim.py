@@ -1,4 +1,4 @@
-"""FFT spectral-path animation for the career-site / README embed.
+"""FFT spectral-path animation for a README embed.
 
 Per-frame pipeline (mirrors firmware/main_fft.c on a 30-s sliding window):
   band-pass FIR → decimate by 8 → Hamming → FFT → argmax in HR band
