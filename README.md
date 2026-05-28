@@ -1,10 +1,11 @@
 # Embedded PPG Heart-Rate + Respiration-Rate Estimator — ARM Cortex-M3 (QEMU)
 
 <p align="center">
-  <img src="results/web/pipeline_fft.gif" alt="PPG FFT pipeline animation: raw signal → Q15 band-pass FIR → 256-pt FFT spectrum → live HR readout" width="720">
+  <img src="results/sqi_comparison.png" alt="1D-CNN SQI vs variance gate on held-out PPG-DaLiA: HR MAE drops from 12.0 to 5.3 bpm at 68% acceptance" width="720">
   <br>
-  <em>BIDMC record 01 → Q15 band-pass FIR → decimate → Hamming → 256-pt Q15 FFT → sub-harmonic check → live HR.
-  The number ticking below is the firmware's parabolic-interpolated spectral estimator, bit-exactly.</em>
+  <em>1D-CNN signal-quality gate vs the variance gate on held-out PPG-DaLiA subjects (S6, S15).
+  HR-MAE on accepted windows drops from 12.0 bpm to 5.3 bpm (−6.8 bpm) at ≥66 % acceptance.
+  Tiny CNN (~1k parameters), trained offline; numpy inference + bit-exact Cortex-M3 port.</em>
 </p>
 
 [![CI](https://img.shields.io/badge/CI-build--and--validate-blue)](.github/workflows/ci.yml)
@@ -64,6 +65,38 @@ The full-corpus number is dragged down by mechanically-ventilated patients whose
 fixed-paced RR produces less baseline modulation, and whose impedance-pneumography
 reference is itself noisy. Methodology, three-way decomposition, and the
 no-leakage statement are in [`results/README.md`](results/README.md).
+
+## 1D-CNN signal-quality gate (PPG-DaLiA, motion-corrupted)
+
+BIDMC is clinical-grade ICU data — the classical DSP variance gate is fine
+there because the signal is clean. **PPG-DaLiA** (Reiss 2019, wrist-worn
+during daily activity — sit, stairs, soccer, cycling, walking, …) is the
+opposite regime: motion artefacts shred the signal often enough that the
+variance gate accepts > 90 % of windows but the FFT-path HR estimate on
+those windows is 10–15 bpm off.
+
+A tiny **1D-CNN** (~1k parameters) replaces the variance gate. Architecture
+in [`src/sqi_cnn.py`](src/sqi_cnn.py); trained on 11 PPG-DaLiA subjects,
+validated on 2, held-out test on the remaining 2:
+
+| Held-out subject | windows | variance MAE  | variance accept | CNN MAE | CNN accept | Δ-MAE |
+|---               |    ---: |          ---: |            ---: |    ---: |       ---: |  ---: |
+| S6               |    2622 | 13.70 bpm     | 90.0 %          | **5.76**  | 71.7 %  | **−7.94** |
+| S15              |    3966 | 10.94 bpm     | 90.0 %          | **4.91**  | 66.0 %  | **−6.03** |
+| **POOLED**       |  **6588** | **12.04 bpm** | **90.0 %**  | **5.27**  | **68.3 %** | **−6.77** |
+
+The CNN is **ported to Cortex-M3** (float kernel, [`firmware/dsp_cnn.c`](firmware/dsp_cnn.c) +
+[`firmware/main_sqi.c`](firmware/main_sqi.c) + Makefile target `firmware_sqi.elf`).
+Footprint: **8.5 KB text + 24 KB BSS** (within the lm3s6965's 64 KB SRAM).
+A bit-exact contract is enforced by [`src/verify_cnn.py`](src/verify_cnn.py):
+on a deterministic synthetic input, the numpy reference and the C kernel
+agree to the LSB (×1e6 fixed-point encoding, |Δ| = 0).
+
+The training pipeline (PyTorch) and the trained weights are intentionally **not**
+in the public repo — the inference code is, and the firmware's
+[`firmware/generated/cnn_data.h`](firmware/generated/cnn_data.h) ships with
+**placeholder weights** so the build/CI works without leaking the trained model.
+Real predictions require regenerating the header against a locally-trained `.npz`.
 
 ## Code-reading guide (for reviewers)
 

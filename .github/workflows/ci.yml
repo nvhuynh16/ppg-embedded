@@ -144,6 +144,17 @@ jobs:
       - name: Assert HR_X100 in QEMU output
         run: grep -q "HR_X100=" /tmp/fft_qemu.log
 
+      # 4b. 1D-CNN SQI bit-exactness contract: Python (numpy) ↔ C (Cortex-M3)
+      # on a deterministic synthetic input. Holds against either real or stub
+      # weights in firmware/generated/cnn_data.h — what's tested is the
+      # mathematical equivalence of the inference path.
+      - name: Build SQI firmware + bit-exact CNN check
+        run: |
+          set -x
+          make -C firmware firmware_sqi.elf
+          arm-none-eabi-size firmware/firmware_sqi.elf
+          uv run python src/verify_cnn.py
+
       # 5. BIDMC batch validation on the 3 cached records (smoke), ±5 windows.
       - name: BIDMC batch validation (3 records × 5 windows smoke test)
         run: |

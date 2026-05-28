@@ -40,3 +40,24 @@ data/bidmc_cache/bidmc_csv/*.csv
 # Keep pipeline_fft.gif tracked so the README hero image renders on GitHub.
 results/web/
 !results/web/pipeline_fft.gif
+# PPG-DaLiA cache: full pickles (1.5 GB each) and the source archive stay local.
+# Only S1 + S6 .npz extracts (BVP + HR + activity, ~1.5 MB each) are committed —
+# mirrors the BIDMC bidmc01-03 allowlist pattern.
+data/dalia_cache/PPG_FieldStudy.zip
+data/dalia_cache/PPG_FieldStudy.zip.sha256
+data/dalia_cache/data.zip
+data/dalia_cache/readme.pdf
+data/dalia_cache/PPG_FieldStudy/
+data/dalia_cache/extracts/*.npz
+!data/dalia_cache/extracts/S1.npz
+!data/dalia_cache/extracts/S6.npz
+# TROIKA cache: dataset isn't redistributable from this repo (see NOTICE).
+# Block .mat files; commit only the NOTICE + (future) fetch script.
+data/troika_cache/*.mat
+# Private workspace: training scripts + experiment notebooks + scratch.
+# Never pushed. Contains PyTorch training code that lives outside the
+# public artifact (the inference path uses numpy only).
+private/
+# Model weights — kept local. The public repo demonstrates the inference
+# code + numbers; the actual weights are not redistributed.
+models/
